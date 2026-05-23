@@ -15,7 +15,6 @@
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
     "react": "^18.2.0",
-    "react-anime": "^4.1.1",
     "react-apexcharts": "^1.4.0",
     "react-cookie": "^4.0.3",
     "react-datepicker": "^4.8.0",
