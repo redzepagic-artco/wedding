@@ -10,7 +10,7 @@ const COUPLE = "Nur Osmanbegović & Kerim Redžepagić";
 
 const SCHEDULE = [
   { time: "17:00", title: "Dolazak gostiju", icon: "guests" },
-  { time: "17:30", title: "Ceremonija i darivanje mladenaca", icon: "rings" },
+  { time: "17:30", title: "Ceremonija", icon: "rings" },
   { time: "18:00", title: "Večera", icon: "dinner" },
   { time: "19:00", title: "Prvi ples", icon: "dance" },
   { time: "20:00", title: "Sječenje torte", icon: "cake" },
@@ -24,7 +24,7 @@ const Icon = ({ name, size = 28 }) => {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: 1.5,
+    strokeWidth: 1.8,
     strokeLinecap: "round",
     strokeLinejoin: "round",
     "aria-hidden": true,
@@ -114,7 +114,31 @@ const Icon = ({ name, size = 28 }) => {
   }
 };
 
-const emptyGuest = () => ({ firstName: "", lastName: "" });
+let guestIdSeq = 0;
+const emptyGuest = () => ({ id: ++guestIdSeq, firstName: "", lastName: "" });
+
+// Word-by-word split (for paragraphs)
+const splitWords = (text) =>
+  text.split(/\s+/).map((w, i) => (
+    <span key={i} className="wedding-word" aria-hidden="true">
+      {w}
+    </span>
+  ));
+
+// Character split grouped by word — keeps each word from breaking mid-letter
+const splitTitleChars = (text) => {
+  const words = text.split(" ");
+  return words.map((word, wi) => (
+    <span key={wi} className="wedding-split-word">
+      {Array.from(word).map((ch, ci) => (
+        <span key={ci} className="wedding-split-char" aria-hidden="true">
+          {ch}
+        </span>
+      ))}
+      {wi < words.length - 1 && " "}
+    </span>
+  ));
+};
 
 // Wrap each character in a span for per-letter animation
 const splitChars = (text) =>
@@ -135,7 +159,7 @@ const Index = () => {
   const splashRef = useRef(null);
   const heroRef = useRef(null);
   const successRef = useRef(null);
-  const guestRefs = useRef([]);
+  const guestRefs = useRef({}); // keyed by guest.id
 
   // ===== Splash screen =====
   useLayoutEffect(() => {
@@ -166,16 +190,54 @@ const Index = () => {
         ease: "sine.inOut",
       });
 
+      // Pulsing concentric rings
+      gsap.utils.toArray(".js-splash-ring").forEach((ring, i) => {
+        gsap.fromTo(
+          ring,
+          { opacity: 0, scale: 0.6 },
+          {
+            opacity: 0.7,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
+            delay: i * 0.15,
+          }
+        );
+        gsap.to(ring, {
+          scale: 1.15,
+          opacity: 0.15,
+          duration: 2.4,
+          delay: 1 + i * 0.3,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+
+      // Orbit rotation
+      gsap.fromTo(
+        ".js-splash-orbit",
+        { opacity: 0, rotation: -30 },
+        { opacity: 1, duration: 1, delay: 0.3, ease: "power2.out" }
+      );
+      gsap.to(".js-splash-orbit", {
+        rotation: 360,
+        duration: 6,
+        repeat: -1,
+        ease: "none",
+      });
+
+
       tl.from(".js-splash-monogram", { opacity: 0, scale: 0.6, duration: 1.1, ease: "back.out(1.7)" })
         .from(".js-splash-names", { opacity: 0, y: 24, duration: 0.9 }, "-=0.5")
         .from(".js-splash-date", { opacity: 0, y: 12, letterSpacing: "0.1em", duration: 0.9 }, "-=0.5")
         .to(".js-splash-progress-bar", { width: "100%", duration: 1.4, ease: "power2.inOut" }, "-=0.4")
-        .to(".js-splash-monogram, .js-splash-names, .js-splash-date, .js-splash-progress", {
+        .to(".js-splash-monogram, .js-splash-names, .js-splash-date, .js-splash-progress, .js-splash-ring, .js-splash-orbit, .js-splash-sparkle", {
           opacity: 0,
           y: -20,
           duration: 0.6,
           ease: "power2.in",
-          stagger: 0.05,
+          stagger: 0.04,
         })
         .to(splashRef.current, { yPercent: -100, duration: 1.1, ease: "power4.inOut" }, "-=0.2");
     }, splashRef);
@@ -289,6 +351,177 @@ const Index = () => {
         });
       });
 
+      // Eyebrow underline draw + fade
+      gsap.utils.toArray(".js-eyebrow").forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 12,
+          letterSpacing: "0.6em",
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+        });
+      });
+
+      // Split-title characters cascading in
+      gsap.utils.toArray(".js-split-title").forEach((el) => {
+        const chars = el.querySelectorAll(".wedding-split-char");
+        if (!chars.length) return;
+        gsap.from(chars, {
+          opacity: 0,
+          y: 36,
+          rotateX: -60,
+          transformOrigin: "50% 100%",
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.025,
+          scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" },
+        });
+      });
+
+      // Word-by-word paragraph reveal
+      gsap.utils.toArray(".js-word-para").forEach((el) => {
+        gsap.from(el.querySelectorAll(".wedding-word"), {
+          opacity: 0,
+          y: 14,
+          duration: 0.6,
+          ease: "power2.out",
+          stagger: 0.04,
+          scrollTrigger: { trigger: el, start: "top 80%", toggleActions: "play none none reverse" },
+        });
+      });
+
+      // Slow rotation for decorative circles
+      gsap.utils.toArray(".js-deco-rotate").forEach((el) => {
+        gsap.to(el, {
+          rotation: 360,
+          duration: gsap.utils.random(40, 70),
+          repeat: -1,
+          ease: "none",
+        });
+      });
+
+      // Breathing pulse on filled glow circles
+      gsap.utils.toArray(".js-deco-pulse").forEach((el) => {
+        gsap.to(el, {
+          scale: 1.15,
+          opacity: 0.7,
+          duration: gsap.utils.random(3.5, 5),
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          transformOrigin: "center",
+        });
+      });
+
+      // Horizontal drift on circles
+      gsap.utils.toArray(".js-deco-drift").forEach((el) => {
+        gsap.to(el, {
+          x: gsap.utils.random(-30, 30),
+          y: gsap.utils.random(-20, 20),
+          duration: gsap.utils.random(5, 8),
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+
+      // Diagonal drift on dotted patterns
+      gsap.utils.toArray(".js-deco-dots-drift").forEach((el) => {
+        gsap.to(el, {
+          x: gsap.utils.random(-25, 25),
+          y: gsap.utils.random(-25, 25),
+          opacity: 0.85,
+          duration: gsap.utils.random(4, 7),
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+
+      // Orbit motion — small circle traces a wobble path
+      gsap.utils.toArray(".js-deco-orbit").forEach((el) => {
+        gsap.to(el, {
+          x: 20,
+          y: -20,
+          duration: 4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+        gsap.to(el, {
+          rotation: -360,
+          duration: 30,
+          repeat: -1,
+          ease: "none",
+        });
+      });
+
+      // Ripple-out pulse (scale + fade ring outward, repeat)
+      gsap.utils.toArray(".js-deco-pulse-out").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { scale: 0.6, opacity: 0.8 },
+          {
+            scale: 2.2,
+            opacity: 0,
+            duration: 3.5,
+            repeat: -1,
+            ease: "power2.out",
+            transformOrigin: "center",
+          }
+        );
+      });
+
+      // Scroll progress bar
+      gsap.to(".js-progress-bar", {
+        width: "100%",
+        ease: "none",
+        scrollTrigger: { trigger: pageRef.current, start: "top top", end: "bottom bottom", scrub: 0.3 },
+      });
+
+      // Ambient floating petals between sections (desktop/tablet only — they animate continuously)
+      mm.add("(min-width: 769px)", () => {
+        gsap.utils.toArray(".js-ambient-petal").forEach((el, i) => {
+          gsap.fromTo(
+            el,
+            { opacity: 0, y: 60, rotation: 0 },
+            {
+              opacity: 0.65,
+              y: -200,
+              rotation: gsap.utils.random(-180, 180),
+              ease: "none",
+              scrollTrigger: { trigger: el, start: "top 95%", end: "+=600", scrub: 1.2 },
+              delay: i * 0.05,
+            }
+          );
+        });
+      });
+
+      // Closing divider line draws in
+      gsap.utils.toArray(".js-closing-divider").forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          scaleX: 0.3,
+          duration: 1,
+          transformOrigin: "center",
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+        });
+      });
+
+      // Closing date pill float-in
+      gsap.utils.toArray(".js-closing-date").forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 16,
+          letterSpacing: "0.3em",
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: { trigger: el, start: "top 90%", toggleActions: "play none none reverse" },
+        });
+      });
+
       // Schedule timeline line drawing in
       gsap.to(".js-schedule-line", {
         scaleY: 1,
@@ -297,15 +530,21 @@ const Index = () => {
         scrollTrigger: { trigger: ".js-schedule-line", start: "top 80%", toggleActions: "play none none reverse" },
       });
 
-      // Schedule items alternating side reveal
+      // Schedule items alternating side reveal + icon spin
       gsap.utils.toArray(".js-schedule-item").forEach((el, i) => {
-        gsap.from(el, {
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+        });
+        tl.from(el, {
           opacity: 0,
           x: i % 2 === 0 ? -60 : 60,
           duration: 0.8,
           ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
-        });
+        }).from(
+          el.querySelector(".wedding-schedule__icon"),
+          { rotation: -180, scale: 0.4, duration: 0.7, ease: "back.out(1.7)" },
+          "-=0.5"
+        );
       });
 
       // RSVP card pop with slight rotation
@@ -323,13 +562,25 @@ const Index = () => {
     return () => ctx.revert();
   }, [splashDone, submitted]);
 
-  // Guest row in/out
+  // Animate newly added guest row in (track last id rather than length)
+  const prevLastIdRef = useRef(guests[0]?.id);
   useEffect(() => {
-    const last = guestRefs.current[guests.length - 1];
-    if (last && guests.length > 1) {
-      gsap.from(last, { opacity: 0, y: -10, height: 0, marginBottom: 0, duration: 0.45, ease: "power2.out" });
+    const lastId = guests[guests.length - 1]?.id;
+    if (lastId && lastId !== prevLastIdRef.current && guests.length > 1) {
+      const el = guestRefs.current[lastId];
+      if (el) {
+        gsap.from(el, {
+          opacity: 0,
+          y: -10,
+          height: 0,
+          marginBottom: 0,
+          duration: 0.45,
+          ease: "power2.out",
+        });
+      }
     }
-  }, [guests.length]);
+    prevLastIdRef.current = lastId;
+  }, [guests]);
 
   // Success screen
   useLayoutEffect(() => {
@@ -346,24 +597,22 @@ const Index = () => {
     return () => ctx.revert();
   }, [submitted]);
 
-  const updateGuest = (idx, field, value) => {
-    setGuests((prev) => prev.map((g, i) => (i === idx ? { ...g, [field]: value } : g)));
+  const updateGuest = (id, field, value) => {
+    setGuests((prev) => prev.map((g) => (g.id === id ? { ...g, [field]: value } : g)));
   };
 
   const addGuest = () => setGuests((prev) => [...prev, emptyGuest()]);
 
-  const removeGuest = (idx) => {
-    const row = guestRefs.current[idx];
+  const removeGuest = (id) => {
+    const row = guestRefs.current[id];
+    const drop = () => {
+      delete guestRefs.current[id];
+      setGuests((prev) => (prev.length === 1 ? prev : prev.filter((g) => g.id !== id)));
+    };
     if (row) {
-      gsap.to(row, {
-        opacity: 0,
-        x: 30,
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => setGuests((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx))),
-      });
+      gsap.to(row, { opacity: 0, x: 30, duration: 0.3, ease: "power2.in", onComplete: drop });
     } else {
-      setGuests((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
+      drop();
     }
   };
 
@@ -402,18 +651,40 @@ const Index = () => {
   // Splash markup — kept mounted until GSAP slides it offscreen, then unmounted
   const splash = !splashDone && (
     <div ref={splashRef} className="wedding-splash">
-      {Array.from({ length: 14 }).map((_, i) => (
+      {/* Two concentric pulsing rings, centered */}
+      {[200, 320].map((size, i) => (
         <span
-          key={i}
+          key={`ring-${i}`}
+          className="js-splash-ring wedding-splash__ring"
+          style={{ width: size, height: size }}
+        />
+      ))}
+
+      {/* Orbiting dot around the monogram */}
+      <div className="js-splash-orbit wedding-splash__orbit">
+        <span className="wedding-splash__orbit-dot" style={{ transform: "translate(120px, 0)" }} />
+      </div>
+
+      {/* Symmetric sparkles — 8 positions evenly around the center */}
+      {[
+        { top: "18%", left: "50%" },
+        { top: "82%", left: "50%" },
+        { top: "50%", left: "12%" },
+        { top: "50%", left: "88%" },
+        { top: "25%", left: "22%" },
+        { top: "25%", left: "78%" },
+        { top: "75%", left: "22%" },
+        { top: "75%", left: "78%" },
+      ].map((pos, i) => (
+        <span
+          key={`s-${i}`}
           className="js-splash-sparkle wedding-splash__sparkle"
-          style={{
-            top: `${20 + (i * 37) % 60}%`,
-            left: `${15 + (i * 53) % 70}%`,
-          }}
+          style={{ ...pos, transform: "translate(-50%, -50%)" }}
         >
           ✦
         </span>
       ))}
+
       <div className="wedding-splash__inner">
         <div className="js-splash-monogram wedding-splash__monogram">N &amp; K</div>
         <div className="js-splash-names wedding-splash__names">Nur &amp; Kerim</div>
@@ -473,6 +744,9 @@ const Index = () => {
     <>
       {splash}
       <div ref={pageRef} className="wedding-page">
+        <div className="wedding-progress" aria-hidden="true">
+          <div className="js-progress-bar wedding-progress__bar" />
+        </div>
         {/* HERO */}
         <section ref={heroRef} className="wedding-hero d-flex align-items-center justify-content-center">
           {/* Decorative layers */}
@@ -531,29 +805,43 @@ const Index = () => {
         </section>
 
         {/* MESSAGE */}
-        <section className="wedding-section">
-          <div className="container text-center js-reveal" style={{ maxWidth: 760 }}>
-            <p className="wedding-eyebrow">Draga porodice i prijatelji</p>
-            <h2 className="wedding-section__title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 24 }}>
-              S radošću Vas pozivamo na naš veliki dan
+        <section className="wedding-section js-section">
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 320, height: 320, top: "-80px", left: "-120px" }} />
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-drift" style={{ width: 200, height: 200, top: "20%", right: "-60px" }} />
+          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 120, height: 120, bottom: "-30px", left: "8%" }} />
+          <div className="container text-center" style={{ maxWidth: 760 }}>
+            <p className="wedding-eyebrow js-eyebrow">Draga porodice i prijatelji</p>
+            <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 24 }}>
+              {splitTitleChars("S radošću Vas pozivamo na naš veliki dan")}
             </h2>
-            <p style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)" }}>
-              Najdraži naši,
-              <br />
-              poslije svih lijepih trenutaka koje smo podijelili, došao je i taj naš dan.
-              <br />
-              Dođite — ne bi nam bio isti bez vas.
+            <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)" }}>
+              {splitWords("Najdraži naši, poslije svih lijepih trenutaka koje smo podijelili, došao je i taj naš dan. Dođite — ne bi nam bio isti bez vas.")}
             </p>
           </div>
         </section>
 
+        {/* Ambient floating petals */}
+        <div className="wedding-ambient js-ambient" aria-hidden="true">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <span
+              key={i}
+              className="wedding-ambient__petal js-ambient-petal"
+              style={{ left: `${(i * 13 + 8) % 96}%`, top: `${(i * 23) % 80 - 20}px` }}
+            />
+          ))}
+        </div>
+
         {/* SCHEDULE */}
-        <section className="wedding-section">
+        <section className="wedding-section js-section">
+          <span className="wedding-deco wedding-deco--circle js-deco-rotate" style={{ width: 380, height: 380, top: "10%", right: "-180px" }} />
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 260, height: 260, bottom: "-80px", left: "-90px" }} />
+          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 140, height: 140, top: "30px", left: "5%" }} />
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-orbit" style={{ width: 120, height: 120, bottom: "10%", right: "8%" }} />
           <div className="container">
-            <div className="text-center js-reveal" style={{ marginBottom: 48 }}>
-              <p className="wedding-eyebrow">Raspored</p>
-              <h2 className="wedding-section__title" style={{ fontSize: "clamp(26px, 5vw, 54px)" }}>
-                Tok dana
+            <div className="text-center" style={{ marginBottom: 48 }}>
+              <p className="wedding-eyebrow js-eyebrow">Raspored</p>
+              <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)" }}>
+                {splitTitleChars("Tok dana")}
               </h2>
             </div>
 
@@ -573,12 +861,15 @@ const Index = () => {
         </section>
 
         {/* RSVP */}
-        <section className="wedding-section">
+        <section className="wedding-section js-section">
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 460, height: 460, top: "50%", left: "50%", marginTop: -230, marginLeft: -230 }} />
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 300, height: 300, top: "-60px", right: "-100px" }} />
+          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 160, height: 160, bottom: "40px", left: "4%" }} />
           <div className="container">
-            <div className="text-center js-reveal" style={{ marginBottom: 40 }}>
-              <p className="wedding-eyebrow">Potvrda dolaska</p>
-              <h2 className="wedding-section__title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 16 }}>
-                Molimo Vas da potvrdite dolazak
+            <div className="text-center" style={{ marginBottom: 40 }}>
+              <p className="wedding-eyebrow js-eyebrow">Potvrda dolaska</p>
+              <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 16 }}>
+                {splitTitleChars("Molimo Vas da potvrdite dolazak")}
               </h2>
               <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
                 Da bismo sve mogli pripremiti na vrijeme, javite nam dolazite li i koliko Vas dolazi.
@@ -619,7 +910,14 @@ const Index = () => {
                   </div>
 
                   {guests.map((guest, idx) => (
-                    <div key={idx} ref={(el) => (guestRefs.current[idx] = el)} className="wedding-guest-card">
+                    <div
+                      key={guest.id}
+                      ref={(el) => {
+                        if (el) guestRefs.current[guest.id] = el;
+                        else delete guestRefs.current[guest.id];
+                      }}
+                      className="wedding-guest-card"
+                    >
                       <div className="wedding-guest-card__avatar">{idx + 1}</div>
                       <div className="wedding-guest-card__fields">
                         <input
@@ -627,7 +925,7 @@ const Index = () => {
                           className="wedding-input"
                           placeholder="Ime"
                           value={guest.firstName}
-                          onChange={(e) => updateGuest(idx, "firstName", e.target.value)}
+                          onChange={(e) => updateGuest(guest.id, "firstName", e.target.value)}
                           required
                         />
                         <input
@@ -635,7 +933,7 @@ const Index = () => {
                           className="wedding-input"
                           placeholder="Prezime"
                           value={guest.lastName}
-                          onChange={(e) => updateGuest(idx, "lastName", e.target.value)}
+                          onChange={(e) => updateGuest(guest.id, "lastName", e.target.value)}
                           required
                         />
                       </div>
@@ -643,7 +941,7 @@ const Index = () => {
                         {guests.length > 1 && (
                           <button
                             type="button"
-                            onClick={() => removeGuest(idx)}
+                            onClick={() => removeGuest(guest.id)}
                             className="wedding-icon-btn"
                             aria-label="Ukloni osobu"
                           >
@@ -676,12 +974,16 @@ const Index = () => {
         </section>
 
         {/* Closing */}
-        <section className="wedding-section js-reveal" style={{ paddingBottom: 120 }}>
+        <section className="wedding-section js-section" style={{ paddingBottom: 120 }}>
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 360, height: 360, top: "50%", left: "50%", marginTop: -180, marginLeft: -180 }} />
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 240, height: 240, top: "50%", left: "50%", marginTop: -120, marginLeft: -120 }} />
+          <span className="wedding-deco wedding-deco--circle js-deco-pulse-out" style={{ width: 140, height: 140, top: "50%", left: "50%", marginTop: -70, marginLeft: -70 }} />
           <div className="container text-center">
-            <div className="wedding-divider" aria-hidden="true">
+            <div className="wedding-divider js-closing-divider" aria-hidden="true">
               <span>♥</span>
             </div>
             <p
+              className="js-split-title"
               style={{
                 fontFamily: '"Playfair Display", serif',
                 fontStyle: "italic",
@@ -690,9 +992,9 @@ const Index = () => {
                 marginBottom: 8,
               }}
             >
-              {COUPLE}
+              {splitTitleChars(COUPLE)}
             </p>
-            <p style={{ fontSize: "clamp(14px, 2vw, 18px)", color: "var(--wedding-muted)", letterSpacing: "0.1em" }}>{WEDDING_DATE}</p>
+            <p className="js-closing-date" style={{ fontSize: "clamp(14px, 2vw, 18px)", color: "var(--wedding-muted)", letterSpacing: "0.1em" }}>{WEDDING_DATE}</p>
           </div>
         </section>
       </div>
