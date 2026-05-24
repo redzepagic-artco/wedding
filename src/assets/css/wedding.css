@@ -10,13 +10,22 @@ html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  overscroll-behavior-y: auto;
+}
+
+#root {
+  overflow-x: clip;
 }
 
 img { max-width: 100%; display: block; }
@@ -66,6 +75,8 @@ button {
   background: linear-gradient(180deg, var(--wedding-cream) 0%, #fff 100%);
   color: var(--wedding-ink);
   font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .wedding-page * {
@@ -181,6 +192,7 @@ button {
     radial-gradient(ellipse at top, rgba(200, 169, 106, 0.12), transparent 65%),
     linear-gradient(180deg, var(--wedding-blush) 0%, var(--wedding-cream) 100%);
   overflow: hidden;
+  touch-action: pan-y;
 }
 
 @media (max-width: 575px) {
@@ -957,4 +969,26 @@ button {
 /* Prevent body scroll while splash visible */
 body.is-splash-locked {
   overflow: hidden;
+}
+
+/* Disable hover-based motion on touch devices (sticky states on mobile) */
+@media (hover: none) {
+  .wedding-schedule__item:hover,
+  .wedding-guest-card:hover,
+  .wedding-choice:hover,
+  .wedding-submit:hover:not(:disabled),
+  .wedding-add-btn:hover,
+  .wedding-icon-btn:hover,
+  .wedding-choice:hover .wedding-choice__icon,
+  .wedding-schedule__item:hover .wedding-schedule__icon {
+    transform: none;
+    box-shadow: 0 4px 18px rgba(168, 134, 72, 0.08);
+  }
+  .wedding-submit:hover:not(:disabled) {
+    letter-spacing: 0.15em;
+  }
+  .wedding-icon-btn:hover {
+    background: transparent;
+    color: var(--wedding-gold-dark);
+  }
 }

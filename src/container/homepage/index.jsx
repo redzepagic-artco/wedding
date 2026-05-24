@@ -141,10 +141,17 @@ const Index = () => {
   useLayoutEffect(() => {
     document.body.classList.add("is-splash-locked");
 
+    // Safety: never leave the body locked for more than 6s, even if a tween glitches
+    const safety = setTimeout(() => {
+      document.body.classList.remove("is-splash-locked");
+      setSplashDone(true);
+    }, 6000);
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
         onComplete: () => {
+          clearTimeout(safety);
           document.body.classList.remove("is-splash-locked");
           setSplashDone(true);
         },
@@ -174,6 +181,7 @@ const Index = () => {
     }, splashRef);
 
     return () => {
+      clearTimeout(safety);
       document.body.classList.remove("is-splash-locked");
       ctx.revert();
     };
@@ -242,29 +250,32 @@ const Index = () => {
         { y: 42, opacity: 0, duration: 1.6, repeat: -1, ease: "power1.in" }
       );
 
-      // Hero parallax on scroll
-      gsap.to(".js-hero-content", {
-        y: 120,
-        opacity: 0.2,
-        ease: "none",
-        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to(".js-hero-glow", {
-        y: 200,
-        ease: "none",
-        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to(".js-hero-ring-1", {
-        rotation: 90,
-        scale: 1.2,
-        ease: "none",
-        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to(".js-hero-ring-2", {
-        rotation: -120,
-        scale: 0.85,
-        ease: "none",
-        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+      // Hero parallax on scroll — desktop/tablet only (scrub triggers can fight touch scrolling on iOS)
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 769px)", () => {
+        gsap.to(".js-hero-content", {
+          y: 120,
+          opacity: 0.2,
+          ease: "none",
+          scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+        gsap.to(".js-hero-glow", {
+          y: 200,
+          ease: "none",
+          scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+        gsap.to(".js-hero-ring-1", {
+          rotation: 90,
+          scale: 1.2,
+          ease: "none",
+          scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
+        gsap.to(".js-hero-ring-2", {
+          rotation: -120,
+          scale: 0.85,
+          ease: "none",
+          scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+        });
       });
 
       // Section reveals on scroll
