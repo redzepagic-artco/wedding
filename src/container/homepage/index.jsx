@@ -1,19 +1,19 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "../../assets/css/wedding.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const WEDDING_DATE = "16.08.2025.";
+const WEDDING_DATE = "16.08.2026.";
 const COUPLE = "Nur Osmanbegović & Kerim Redžepagić";
 
 const SCHEDULE = [
-  { time: "17:00", title: "Dolazak gostiju", icon: "guests" },
-  { time: "17:30", title: "Ceremonija", icon: "rings" },
-  { time: "18:00", title: "Večera", icon: "dinner" },
-  { time: "19:00", title: "Prvi ples", icon: "dance" },
-  { time: "20:00", title: "Sječenje torte", icon: "cake" },
+  { time: "17:15", title: "Dolazak gostiju", icon: "guests" },
+  { time: "18:00", title: "Ceremonija, čestitanje i slikanje", icon: "rings" },
+  { time: "18:45", title: "Večera", icon: "dinner" },
+  { time: "19:30", title: "Prvi ples", icon: "dance" },
+  { time: "21:00", title: "Torta", icon: "cake" },
 ];
 
 // Inline SVG icon set
@@ -109,13 +109,24 @@ const Icon = ({ name, size = 28 }) => {
           <path d="M3 8l9 6 9-6" />
         </svg>
       );
+    case "pin":
+      return (
+        <svg {...common}>
+          <path d="M12 21s7-5.5 7-11a7 7 0 0 0-14 0c0 5.5 7 11 7 11z" />
+          <circle cx="12" cy="10" r="2.6" />
+        </svg>
+      );
+    case "parking":
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="16" height="16" rx="3" />
+          <path d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3" />
+        </svg>
+      );
     default:
       return null;
   }
 };
-
-let guestIdSeq = 0;
-const emptyGuest = () => ({ id: ++guestIdSeq, firstName: "", lastName: "" });
 
 // Word-by-word split (for paragraphs)
 const splitWords = (text) =>
@@ -150,16 +161,10 @@ const splitChars = (text) =>
 
 const Index = () => {
   const [splashDone, setSplashDone] = useState(false);
-  const [attending, setAttending] = useState(null);
-  const [guests, setGuests] = useState([emptyGuest()]);
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   const pageRef = useRef(null);
   const splashRef = useRef(null);
   const heroRef = useRef(null);
-  const successRef = useRef(null);
-  const guestRefs = useRef({}); // keyed by guest.id
 
   // ===== Splash screen =====
   useLayoutEffect(() => {
@@ -251,7 +256,7 @@ const Index = () => {
 
   // ===== Hero + section animations (after splash) =====
   useLayoutEffect(() => {
-    if (!splashDone || submitted) return;
+    if (!splashDone) return;
 
     const ctx = gsap.context(() => {
       // Floating petals (parallax + drift)
@@ -547,106 +552,10 @@ const Index = () => {
         );
       });
 
-      // RSVP card pop with slight rotation
-      gsap.from(".js-rsvp-card", {
-        opacity: 0,
-        y: 60,
-        rotateX: -8,
-        transformPerspective: 800,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: { trigger: ".js-rsvp-card", start: "top 85%", toggleActions: "play none none reverse" },
-      });
     }, pageRef);
 
     return () => ctx.revert();
-  }, [splashDone, submitted]);
-
-  // Animate newly added guest row in (track last id rather than length)
-  const prevLastIdRef = useRef(guests[0]?.id);
-  useEffect(() => {
-    const lastId = guests[guests.length - 1]?.id;
-    if (lastId && lastId !== prevLastIdRef.current && guests.length > 1) {
-      const el = guestRefs.current[lastId];
-      if (el) {
-        gsap.from(el, {
-          opacity: 0,
-          y: -10,
-          height: 0,
-          marginBottom: 0,
-          duration: 0.45,
-          ease: "power2.out",
-        });
-      }
-    }
-    prevLastIdRef.current = lastId;
-  }, [guests]);
-
-  // Success screen
-  useLayoutEffect(() => {
-    if (!submitted || !successRef.current) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".js-success-heart", { opacity: 0, scale: 0.4, duration: 0.8, ease: "back.out(1.7)" })
-        .to(".js-success-heart", { scale: 1.15, duration: 0.9, yoyo: true, repeat: -1, ease: "sine.inOut" }, ">")
-        .from(".js-success-eyebrow", { opacity: 0, y: 16, duration: 0.6 }, "-=0.4")
-        .from(".js-success-title", { opacity: 0, y: 30, duration: 0.9 }, "-=0.3")
-        .from(".js-success-msg", { opacity: 0, y: 20, duration: 0.8 }, "-=0.5")
-        .from(".js-success-couple", { opacity: 0, y: 20, duration: 0.8 }, "-=0.5");
-    }, successRef);
-    return () => ctx.revert();
-  }, [submitted]);
-
-  const updateGuest = (id, field, value) => {
-    setGuests((prev) => prev.map((g) => (g.id === id ? { ...g, [field]: value } : g)));
-  };
-
-  const addGuest = () => setGuests((prev) => [...prev, emptyGuest()]);
-
-  const removeGuest = (id) => {
-    const row = guestRefs.current[id];
-    const drop = () => {
-      delete guestRefs.current[id];
-      setGuests((prev) => (prev.length === 1 ? prev : prev.filter((g) => g.id !== id)));
-    };
-    if (row) {
-      gsap.to(row, { opacity: 0, x: 30, duration: 0.3, ease: "power2.in", onComplete: drop });
-    } else {
-      drop();
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (attending === null) return;
-    setSubmitting(true);
-    const payload = {
-      attending,
-      guests: attending ? guests.filter((g) => g.firstName.trim() || g.lastName.trim()) : [],
-    };
-    try {
-      // TODO: replace with real backend endpoint
-      await fetch("/api/rsvp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).catch(() => {
-        // eslint-disable-next-line no-console
-        console.log("RSVP submission (no backend yet):", payload);
-      });
-    } finally {
-      gsap.to(pageRef.current, {
-        opacity: 0,
-        y: -20,
-        duration: 0.5,
-        ease: "power2.in",
-        onComplete: () => {
-          setSubmitting(false);
-          setSubmitted(true);
-        },
-      });
-    }
-  };
+  }, [splashDone]);
 
   // Splash markup — kept mounted until GSAP slides it offscreen, then unmounted
   const splash = !splashDone && (
@@ -695,50 +604,6 @@ const Index = () => {
       </div>
     </div>
   );
-
-  if (submitted) {
-    return (
-      <>
-        <div ref={successRef} className="wedding-page wedding-success">
-          <div className="container">
-            <div className="js-success-heart wedding-success__heart">♥</div>
-            <p className="js-success-eyebrow wedding-eyebrow">Hvala Vam</p>
-            <h1
-              className="js-success-title"
-              style={{
-                fontFamily: '"Playfair Display", serif',
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: "clamp(28px, 6vw, 72px)",
-                marginBottom: 24,
-              }}
-            >
-              Vidimo se {WEDDING_DATE}
-            </h1>
-            <p
-              className="js-success-msg"
-              style={{ maxWidth: 640, margin: "0 auto 36px", fontSize: "clamp(16px, 2.4vw, 22px)", lineHeight: 1.6, color: "var(--wedding-muted)" }}
-            >
-              {attending
-                ? "Hvala što ste prihvatili naš poziv. Radujemo se što ćemo ovaj poseban dan podijeliti s Vama. Vaše prisustvo čini ga još ljepšim."
-                : "Hvala što ste nam javili. Žao nam je što nećete moći biti s nama, ali Vas nosimo u mislima na naš veliki dan."}
-            </p>
-            <p
-              className="js-success-couple"
-              style={{
-                fontFamily: '"Playfair Display", serif',
-                fontStyle: "italic",
-                fontSize: "clamp(20px, 3.5vw, 28px)",
-                color: "var(--wedding-gold-dark)",
-              }}
-            >
-              {COUPLE}
-            </p>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -792,7 +657,7 @@ const Index = () => {
               className="js-hero-day"
               style={{ fontSize: "clamp(13px, 2vw, 18px)", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--wedding-muted)" }}
             >
-              Subota
+              Nedjelja
             </p>
           </div>
 
@@ -810,12 +675,18 @@ const Index = () => {
           <span className="wedding-deco wedding-deco--circle-filled js-deco-drift" style={{ width: 200, height: 200, top: "20%", right: "-60px" }} />
           <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 120, height: 120, bottom: "-30px", left: "8%" }} />
           <div className="container text-center" style={{ maxWidth: 760 }}>
-            <p className="wedding-eyebrow js-eyebrow">Draga porodice i prijatelji</p>
+            <p className="wedding-eyebrow js-eyebrow">Draga porodico i prijatelji</p>
             <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 24 }}>
-              {splitTitleChars("S radošću Vas pozivamo na naš veliki dan")}
+              {splitTitleChars("Sa radošću vas pozivamo na naš veliki dan")}
             </h2>
             <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)" }}>
-              {splitWords("Najdraži naši, poslije svih lijepih trenutaka koje smo podijelili, došao je i taj naš dan. Dođite — ne bi nam bio isti bez vas.")}
+              {splitWords("Najmiliji naši, svi lijepi trenuci naših života bili su još ljepši jer ste vi bili uz nas. Dan kada svoju ljubav krunišemo brakom ne bi nam bio isti bez vas.")}
+            </p>
+            <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)", marginTop: 20 }}>
+              {splitWords("Pozivamo vas da nas počastite svojim prisustvom u nedjelju, 16.08.2026. godine, u hotelu „Austria i Bosna“.")}
+            </p>
+            <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)", marginTop: 20 }}>
+              {splitWords("Radujemo se susretu i zajedničkom slavlju!")}
             </p>
           </div>
         </section>
@@ -869,107 +740,57 @@ const Index = () => {
             <div className="text-center" style={{ marginBottom: 40 }}>
               <p className="wedding-eyebrow js-eyebrow">Potvrda dolaska</p>
               <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 16 }}>
-                {splitTitleChars("Molimo Vas da potvrdite dolazak")}
+                {splitTitleChars("Molimo da nam potvrdite dolazak")}
               </h2>
               <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
-                Da bismo sve mogli pripremiti na vrijeme, javite nam dolazite li i koliko Vas dolazi.
+                Molimo da nam potvrdite dolazak do 16. jula.
               </p>
             </div>
+          </div>
+        </section>
 
-            <form onSubmit={handleSubmit} className="js-rsvp-card wedding-rsvp__card">
-              <div className="wedding-choice-group">
-                <button
-                  type="button"
-                  onClick={() => setAttending(true)}
-                  className={`wedding-choice ${attending === true ? "is-active" : ""}`}
-                >
-                  <span className="wedding-choice__icon"><Icon name="check" size={18} /></span>
-                  <span>Dolazim</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAttending(false)}
-                  className={`wedding-choice ${attending === false ? "is-active" : ""}`}
-                >
-                  <span className="wedding-choice__icon"><Icon name="x" size={18} /></span>
-                  <span>Ne mogu doći</span>
-                </button>
-              </div>
+        {/* LOCATION */}
+        <section className="wedding-section js-section">
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 360, height: 360, top: "-100px", right: "-140px" }} />
+          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 140, height: 140, bottom: "40px", left: "5%" }} />
+          <div className="container">
+            <div className="text-center" style={{ marginBottom: 40 }}>
+              <p className="wedding-eyebrow js-eyebrow">Lokacija</p>
+              <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 12 }}>
+                {splitTitleChars("Hotel Austria & Bosna")}
+              </h2>
+              <a
+                href="https://maps.app.goo.gl/MZeF337cuRPV6eQe9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="wedding-map-link"
+              >
+                <Icon name="pin" size={16} />
+                <span>Otvori u Google Maps</span>
+              </a>
+            </div>
 
-              {attending === true && (
-                <div className="wedding-guests">
-                  <div className="wedding-guests__header">
-                    <div>
-                      <p className="wedding-guests__title">Lista gostiju</p>
-                      <p className="wedding-guests__subtitle">Unesite ime i prezime za svaku osobu koja dolazi</p>
-                    </div>
-                    <span className="wedding-guests__count">
-                      <Icon name="user" size={16} />
-                      {guests.length} {guests.length === 1 ? "osoba" : guests.length < 5 ? "osobe" : "osoba"}
-                    </span>
-                  </div>
+            <div className="js-reveal wedding-map">
+              <iframe
+                title="Hotel Austria & Bosna — lokacija"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3298.192221189382!2d18.30289377660733!3d43.82634097109456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4758ca135588c267%3A0xf429f5c92990106!2sAustria%20%26%20Bosnia!5e1!3m2!1sen!2sus!4v1781923489083!5m2!1sen!2sus"
+                width="600"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
 
-                  {guests.map((guest, idx) => (
-                    <div
-                      key={guest.id}
-                      ref={(el) => {
-                        if (el) guestRefs.current[guest.id] = el;
-                        else delete guestRefs.current[guest.id];
-                      }}
-                      className="wedding-guest-card"
-                    >
-                      <div className="wedding-guest-card__avatar">{idx + 1}</div>
-                      <div className="wedding-guest-card__fields">
-                        <input
-                          type="text"
-                          className="wedding-input"
-                          placeholder="Ime"
-                          value={guest.firstName}
-                          onChange={(e) => updateGuest(guest.id, "firstName", e.target.value)}
-                          required
-                        />
-                        <input
-                          type="text"
-                          className="wedding-input"
-                          placeholder="Prezime"
-                          value={guest.lastName}
-                          onChange={(e) => updateGuest(guest.id, "lastName", e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="wedding-guest-card__action">
-                        {guests.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeGuest(guest.id)}
-                            className="wedding-icon-btn"
-                            aria-label="Ukloni osobu"
-                          >
-                            <Icon name="x" size={16} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="text-center wedding-guests__add">
-                    <button type="button" onClick={addGuest} className="wedding-add-btn">
-                      <Icon name="plus" size={16} />
-                      Dodaj još jednu osobu
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {attending !== null && (
-                <div className="text-center wedding-submit-wrap">
-                  <button type="submit" disabled={submitting} className="wedding-submit">
-                    <span className="wedding-submit__icon"><Icon name="envelope" size={18} /></span>
-                    <span>{submitting ? "Šaljem..." : "Pošalji potvrdu"}</span>
-                  </button>
-                </div>
-              )}
-            </form>
+            <div className="js-reveal wedding-note">
+              <span className="wedding-note__icon" aria-hidden="true">
+                <Icon name="parking" size={20} />
+              </span>
+              <p className="wedding-note__text">
+                <strong>Napomena:</strong> Parking za goste ispred hotela je besplatan.
+              </p>
+            </div>
           </div>
         </section>
 
