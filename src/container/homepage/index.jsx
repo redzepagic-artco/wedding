@@ -9,11 +9,11 @@ const WEDDING_DATE = "16.08.2026.";
 const COUPLE = "Nur Osmanbegović & Kerim Redžepagić";
 
 const SCHEDULE = [
-  { time: "17:15", title: "Dolazak gostiju", icon: "guests" },
-  { time: "18:00", title: "Ceremonija, čestitanje i slikanje", icon: "rings" },
-  { time: "18:45", title: "Večera", icon: "dinner" },
-  { time: "19:30", title: "Prvi ples", icon: "dance" },
-  { time: "21:00", title: "Torta", icon: "cake" },
+  { time: "18:00", title: "Dolazak gostiju", icon: "guests" },
+  { time: "18:30", title: "Ceremonija, čestitanje i slikanje", icon: "rings" },
+  { time: "19:15", title: "Večera", icon: "dinner" },
+  { time: "20:00", title: "Prvi ples", icon: "dance" },
+  { time: "21:30", title: "Torta", icon: "cake" },
 ];
 
 // Inline SVG icon set
