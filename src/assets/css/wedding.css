@@ -449,6 +449,65 @@ button {
   color: var(--wedding-ink);
 }
 
+/* Countdown */
+.wedding-countdown {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.wedding-countdown__block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+  padding: 28px 20px;
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(200, 169, 106, 0.2);
+  box-shadow: 0 8px 30px rgba(168, 134, 72, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wedding-countdown__block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(168, 134, 72, 0.18);
+}
+
+.wedding-countdown__number {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1;
+  color: var(--wedding-gold);
+  letter-spacing: -0.02em;
+}
+
+.wedding-countdown__label {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(12px, 1.8vw, 15px);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--wedding-muted);
+  margin-top: 10px;
+}
+
+@media (max-width: 575px) {
+  .wedding-countdown {
+    gap: 10px;
+  }
+  .wedding-countdown__block {
+    min-width: 0;
+    flex: 1;
+    padding: 18px 8px;
+    border-radius: 16px;
+  }
+  .wedding-countdown__label {
+    letter-spacing: 0.1em;
+  }
+}
+
 /* Schedule */
 .wedding-schedule {
   max-width: 640px;

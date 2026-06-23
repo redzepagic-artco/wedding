@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "../../assets/css/wedding.css";
@@ -6,7 +6,18 @@ import "../../assets/css/wedding.css";
 gsap.registerPlugin(ScrollTrigger);
 
 const WEDDING_DATE = "16.08.2026.";
+const WEDDING_TARGET = new Date("2026-08-16T17:15:00");
 const COUPLE = "Nur Osmanbegović & Kerim Redžepagić";
+
+const getTimeLeft = () => {
+  const diff = Math.max(0, WEDDING_TARGET - Date.now());
+  return {
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff / 3600000) % 24),
+    minutes: Math.floor((diff / 60000) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+};
 
 const SCHEDULE = [
   { time: "18:00", title: "Dolazak gostiju", icon: "guests" },
@@ -159,12 +170,20 @@ const splitChars = (text) =>
     </span>
   ));
 
+const COUNTDOWN_LABELS = ["Dana", "Sati", "Minuta", "Sekundi"];
+
 const Index = () => {
   const [splashDone, setSplashDone] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
 
   const pageRef = useRef(null);
   const splashRef = useRef(null);
   const heroRef = useRef(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // ===== Splash screen =====
   useLayoutEffect(() => {
@@ -666,6 +685,23 @@ const Index = () => {
             <span className="wedding-scroll-cue__line">
               <span className="js-scroll-cue-dot wedding-scroll-cue__dot" />
             </span>
+          </div>
+        </section>
+
+        {/* COUNTDOWN */}
+        <section className="wedding-section wedding-countdown-section js-section">
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 280, height: 280, top: "-60px", right: "-100px" }} />
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 200, height: 200, bottom: "-40px", left: "-80px" }} />
+          <div className="container text-center">
+            <p className="wedding-eyebrow js-eyebrow">Do našeg velikog dana</p>
+            <div className="wedding-countdown js-reveal">
+              {[timeLeft.days, timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((val, i) => (
+                <div key={i} className="wedding-countdown__block">
+                  <span className="wedding-countdown__number">{String(val).padStart(2, "0")}</span>
+                  <span className="wedding-countdown__label">{COUNTDOWN_LABELS[i]}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
