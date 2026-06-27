@@ -904,36 +904,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* RSVP */}
-        <section className="wedding-section js-section">
-          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 460, height: 460, top: "50%", left: "50%", marginTop: -230, marginLeft: -230 }} />
-          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 300, height: 300, top: "-60px", right: "-100px" }} />
-          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 160, height: 160, bottom: "40px", left: "4%" }} />
-          <div className="container">
-            <div className="text-center" style={{ marginBottom: 40 }}>
-              <p className="wedding-eyebrow js-eyebrow">Potvrdite svoje prisustvo</p>
-              <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
-                Očekujemo vas. Molimo da svoje prisustvo potvrdite do 16. jula 2026.
-              </p>
-            </div>
-
-            <RsvpForm />
-
-            <div className="wedding-rsvp-fallback js-reveal">
-              <p>
-                U slučaju bilo kakvih problema sa formom, prisustvo možete javiti i direktno na brojeve:
-              </p>
-              <p>
-                <strong>Nur:</strong>{" "}
-                <a href="tel:+38762506068">+387 62 506 068</a>
-                <span style={{ margin: "0 12px", color: "var(--wedding-gold)" }}>|</span>
-                <strong>Kerim:</strong>{" "}
-                <a href="tel:+38762507356">+387 62 507 356</a>
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* LOCATION */}
         <section className="wedding-section js-section">
           <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 360, height: 360, top: "-100px", right: "-140px" }} />
@@ -978,6 +948,36 @@ const Index = () => {
               </span>
               <p className="wedding-note__text">
                 <strong>Napomena:</strong> Parking za goste ispred hotela je besplatan.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* RSVP */}
+        <section className="wedding-section js-section">
+          <span className="wedding-deco wedding-deco--circle-dashed js-deco-rotate" style={{ width: 460, height: 460, top: "50%", left: "50%", marginTop: -230, marginLeft: -230 }} />
+          <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 300, height: 300, top: "-60px", right: "-100px" }} />
+          <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 160, height: 160, bottom: "40px", left: "4%" }} />
+          <div className="container">
+            <div className="text-center" style={{ marginBottom: 40 }}>
+              <p className="wedding-eyebrow js-eyebrow">Potvrdite svoje prisustvo</p>
+              <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
+                Očekujemo vas. Molimo da svoje prisustvo potvrdite do 16. jula 2026.
+              </p>
+            </div>
+
+            <RsvpForm />
+
+            <div className="wedding-rsvp-fallback js-reveal">
+              <p>
+                U slučaju bilo kakvih problema sa formom, prisustvo možete potvrditi i direktno na brojeve:
+              </p>
+              <p>
+                <strong>Nur:</strong>{" "}
+                <a href="tel:+38762506068">+387 62 506 068</a>
+                <span style={{ margin: "0 12px", color: "var(--wedding-gold)" }}>|</span>
+                <strong>Kerim:</strong>{" "}
+                <a href="tel:+38762507356">+387 62 507 356</a>
               </p>
             </div>
           </div>
