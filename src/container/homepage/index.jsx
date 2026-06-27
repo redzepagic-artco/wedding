@@ -815,6 +815,11 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Couple illustration */}
+        <div className="wedding-illustration js-reveal" aria-hidden="true">
+          <img src="/images2/couple-dancing-XNVWWZw7.png" alt="" />
+        </div>
+
         {/* COUNTDOWN */}
         <section className="wedding-section wedding-countdown-section js-section">
           <span className="wedding-deco wedding-deco--circle-filled js-deco-pulse" style={{ width: 280, height: 280, top: "-60px", right: "-100px" }} />
@@ -865,6 +870,11 @@ const Index = () => {
           ))}
         </div>
 
+        {/* Dress code illustration */}
+        <div className="wedding-illustration wedding-illustration--wide js-reveal" aria-hidden="true">
+          <img src="/images2/dress-code-illustration-sBv8miCU.png" alt="" />
+        </div>
+
         {/* SCHEDULE */}
         <section className="wedding-section js-section">
           <span className="wedding-deco wedding-deco--circle js-deco-rotate" style={{ width: 380, height: 380, top: "10%", right: "-180px" }} />
@@ -901,10 +911,7 @@ const Index = () => {
           <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 160, height: 160, bottom: "40px", left: "4%" }} />
           <div className="container">
             <div className="text-center" style={{ marginBottom: 40 }}>
-              <p className="wedding-eyebrow js-eyebrow">Potvrda prisustva</p>
-              <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 16 }}>
-                {splitTitleChars("Potvrdite svoje prisustvo")}
-              </h2>
+              <p className="wedding-eyebrow js-eyebrow">Potvrdite svoje prisustvo</p>
               <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
                 Očekujemo vas. Molimo da svoje prisustvo potvrdite do 16. jula 2026.
               </p>
@@ -946,6 +953,10 @@ const Index = () => {
                 <Icon name="pin" size={16} />
                 <span>Otvori u Google Maps</span>
               </a>
+            </div>
+
+            <div className="wedding-illustration wedding-illustration--venue js-reveal">
+              <img src="/images2/bentbasa.png" alt="Hotel Austria & Bosna" />
             </div>
 
             <div className="js-reveal wedding-map">
@@ -994,6 +1005,9 @@ const Index = () => {
               {splitTitleChars(COUPLE)}
             </p>
             <p className="js-closing-date" style={{ fontSize: "clamp(14px, 2vw, 18px)", color: "var(--wedding-muted)", letterSpacing: "0.1em" }}>{WEDDING_DATE}</p>
+            <div className="wedding-illustration wedding-illustration--rings js-reveal" aria-hidden="true">
+              <img src="/images2/rings-illustration-tO3OeALU.png" alt="" />
+            </div>
           </div>
         </section>
       </div>
