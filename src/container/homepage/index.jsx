@@ -1,6 +1,7 @@
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import supabase from "../../supabase";
 import "../../assets/css/wedding.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -171,6 +172,132 @@ const splitChars = (text) =>
   ));
 
 const COUNTDOWN_LABELS = ["Dana", "Sati", "Minuta", "Sekundi"];
+
+const RsvpForm = () => {
+  const [attending, setAttending] = useState("da");
+  const [name, setName] = useState("");
+  const [companions, setCompanions] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const addCompanion = () => setCompanions([...companions, ""]);
+  const removeCompanion = (i) => setCompanions(companions.filter((_, idx) => idx !== i));
+  const updateCompanion = (i, val) => {
+    const next = [...companions];
+    next[i] = val;
+    setCompanions(next);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    setSubmitting(true);
+    setError("");
+
+    const { error: dbError } = await supabase.from("rsvp").insert({
+      ime_prezime: name.trim(),
+      dolazak: attending === "da",
+      pratnja: companions.filter((c) => c.trim()),
+    });
+
+    setSubmitting(false);
+
+    if (dbError) {
+      setError("Greška pri slanju. Pokušajte ponovo ili nas kontaktirajte direktno.");
+    } else {
+      setSubmitted(true);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="wedding-rsvp__card js-reveal text-center">
+        <div style={{ fontSize: 48, color: "var(--wedding-gold)", marginBottom: 16 }}>♥</div>
+        <h3 style={{ fontFamily: '"Playfair Display", serif', fontStyle: "italic", fontSize: "clamp(22px, 4vw, 32px)", marginBottom: 12 }}>
+          {attending === "da" ? "Hvala vam! Radujemo se vašem dolasku." : "Hvala na odgovoru. Žao nam je što nećete moći doći."}
+        </h3>
+      </div>
+    );
+  }
+
+  return (
+    <form className="wedding-rsvp__card js-reveal" onSubmit={handleSubmit}>
+      {/* Attendance */}
+      <div className="wedding-rsvp__field">
+        <label className="wedding-rsvp__label">Hoćete li prisustvovati? *</label>
+        <div className="wedding-rsvp__radios">
+          <label className={`wedding-rsvp__radio ${attending === "da" ? "is-active" : ""}`}>
+            <input type="radio" name="attending" value="da" checked={attending === "da"} onChange={() => setAttending("da")} />
+            <span className="wedding-rsvp__radio-dot" />
+            Da, dolazim
+          </label>
+          <label className={`wedding-rsvp__radio ${attending === "ne" ? "is-active" : ""}`}>
+            <input type="radio" name="attending" value="ne" checked={attending === "ne"} onChange={() => setAttending("ne")} />
+            <span className="wedding-rsvp__radio-dot" />
+            Neću moći prisustvovati
+          </label>
+        </div>
+      </div>
+
+      {/* Name */}
+      <div className="wedding-rsvp__field">
+        <label className="wedding-rsvp__label">Ime i prezime *</label>
+        <input
+          type="text"
+          className="wedding-input"
+          placeholder="Ime i prezime"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Companions */}
+      {attending === "da" && (
+        <div className="wedding-rsvp__field">
+          <label className="wedding-rsvp__label">Pratnja</label>
+          <p style={{ fontSize: "clamp(14px, 2vw, 16px)", color: "var(--wedding-muted)", margin: "0 0 14px" }}>
+            Dodajte osobe koje će vam se pridružiti.
+          </p>
+          {companions.map((c, i) => (
+            <div key={i} className="wedding-rsvp__companion">
+              <input
+                type="text"
+                className="wedding-input"
+                placeholder="Ime i prezime pratioca"
+                value={c}
+                onChange={(e) => updateCompanion(i, e.target.value)}
+              />
+              <button type="button" className="wedding-icon-btn" onClick={() => removeCompanion(i)} aria-label="Ukloni">
+                <Icon name="x" size={18} />
+              </button>
+            </div>
+          ))}
+          <button type="button" className="wedding-add-btn" onClick={addCompanion}>
+            <Icon name="plus" size={16} />
+            Pratioc
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <p style={{ color: "#c44", textAlign: "center", marginTop: 16 }}>{error}</p>
+      )}
+
+      {/* Submit */}
+      <div className="wedding-submit-wrap text-center">
+        <button type="submit" className="wedding-submit" disabled={submitting || !name.trim()}>
+          <span className="wedding-submit__icon">
+            <Icon name="envelope" size={18} />
+          </span>
+          {submitting ? "Šaljem..." : "Pošalji potvrdu"}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const Index = () => {
   const [splashDone, setSplashDone] = useState(false);
@@ -713,16 +840,16 @@ const Index = () => {
           <div className="container text-center" style={{ maxWidth: 760 }}>
             <p className="wedding-eyebrow js-eyebrow">Draga porodico i prijatelji</p>
             <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 24 }}>
-              {splitTitleChars("Sa radošću vas pozivamo na naš veliki dan")}
+              {splitTitleChars("Naša ljubavna priča dobija svoje najljepše poglavlje!")}
             </h2>
             <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)" }}>
-              {splitWords("Najmiliji naši, svi lijepi trenuci naših života bili su još ljepši jer ste vi bili uz nas. Dan kada svoju ljubav krunišemo brakom ne bi nam bio isti bez vas.")}
+              {splitWords("Svi lijepi trenuci koje smo do sada doživjeli bili su još posebniji jer ste ih dijelili sa nama. Zato ne možemo zamisliti početak zajedniškog životnog puta bez vašeg prisustva.")}
             </p>
             <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)", marginTop: 20 }}>
-              {splitWords("Pozivamo vas da nas počastite svojim prisustvom u nedjelju, 16.08.2026. godine, u hotelu „Austria i Bosna“.")}
+              {splitWords("Sa zadovoljstvom vas pozivamo da svojim prisustvom uveličate naše vjenčanje u nedjelju, 16.08.2026. godine, u hotelu „Austria i Bosna“.")}
             </p>
             <p className="js-word-para" style={{ fontSize: "clamp(17px, 2.4vw, 22px)", lineHeight: 1.7, color: "var(--wedding-muted)", marginTop: 20 }}>
-              {splitWords("Radujemo se susretu i zajedničkom slavlju!")}
+              {splitWords("Radujemo se zagrljajima, osmijesima i nezaboravnim uspomenama koje ćemo stvoriti zajedno!")}
             </p>
           </div>
         </section>
@@ -774,12 +901,27 @@ const Index = () => {
           <span className="wedding-deco wedding-deco--dots js-deco-dots-drift" style={{ width: 160, height: 160, bottom: "40px", left: "4%" }} />
           <div className="container">
             <div className="text-center" style={{ marginBottom: 40 }}>
-              <p className="wedding-eyebrow js-eyebrow">Potvrda dolaska</p>
+              <p className="wedding-eyebrow js-eyebrow">Potvrda prisustva</p>
               <h2 className="wedding-section__title js-split-title" style={{ fontSize: "clamp(26px, 5vw, 54px)", marginBottom: 16 }}>
-                {splitTitleChars("Molimo da nam potvrdite dolazak")}
+                {splitTitleChars("Potvrdite svoje prisustvo")}
               </h2>
               <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--wedding-muted)", maxWidth: 600, margin: "0 auto" }}>
-                Molimo da nam potvrdite dolazak do 16. jula.
+                Očekujemo vas. Molimo da svoje prisustvo potvrdite do 16. jula 2026.
+              </p>
+            </div>
+
+            <RsvpForm />
+
+            <div className="wedding-rsvp-fallback js-reveal">
+              <p>
+                U slučaju bilo kakvih problema sa formom, prisustvo možete javiti i direktno na brojeve:
+              </p>
+              <p>
+                <strong>Nur:</strong>{" "}
+                <a href="tel:+38762506068">+387 62 506 068</a>
+                <span style={{ margin: "0 12px", color: "var(--wedding-gold)" }}>|</span>
+                <strong>Kerim:</strong>{" "}
+                <a href="tel:+38762507356">+387 62 507 356</a>
               </p>
             </div>
           </div>

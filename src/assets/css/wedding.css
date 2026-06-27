@@ -718,10 +718,123 @@ button {
   border: 1px solid rgba(200, 169, 106, 0.18);
 }
 
+.wedding-rsvp__field {
+  margin-bottom: 28px;
+}
+
+.wedding-rsvp__label {
+  display: block;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--wedding-ink);
+  margin-bottom: 12px;
+}
+
+.wedding-rsvp__radios {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.wedding-rsvp__radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  color: var(--wedding-ink);
+  transition: color 0.3s ease;
+}
+
+.wedding-rsvp__radio input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.wedding-rsvp__radio-dot {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(200, 169, 106, 0.5);
+  position: relative;
+  transition: border-color 0.3s ease;
+}
+
+.wedding-rsvp__radio-dot::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--wedding-gold);
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wedding-rsvp__radio.is-active .wedding-rsvp__radio-dot {
+  border-color: var(--wedding-gold);
+}
+
+.wedding-rsvp__radio.is-active .wedding-rsvp__radio-dot::after {
+  transform: scale(1);
+}
+
+.wedding-rsvp__companion {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.wedding-rsvp__companion .wedding-input {
+  flex: 1;
+}
+
+/* RSVP fallback contact */
+.wedding-rsvp-fallback {
+  max-width: 600px;
+  margin: 36px auto 0;
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(15px, 2vw, 17px);
+  color: var(--wedding-muted);
+  line-height: 1.7;
+}
+
+.wedding-rsvp-fallback a {
+  color: var(--wedding-gold-dark);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.wedding-rsvp-fallback a:hover {
+  color: var(--wedding-gold);
+}
+
 @media (max-width: 575px) {
   .wedding-rsvp__card {
     padding: 22px 14px;
     border-radius: 22px;
+  }
+  .wedding-rsvp__label {
+    font-size: 16px;
+  }
+  .wedding-rsvp__radios {
+    gap: 16px;
+  }
+  .wedding-rsvp__radio {
+    font-size: 16px;
+  }
+  .wedding-rsvp__field {
+    margin-bottom: 22px;
+  }
+  .wedding-rsvp-fallback {
+    margin-top: 24px;
   }
 }
 
