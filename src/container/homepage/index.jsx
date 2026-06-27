@@ -266,7 +266,7 @@ const RsvpForm = () => {
               <input
                 type="text"
                 className="wedding-input"
-                placeholder="Ime i prezime pratioca"
+                placeholder="Ime i prezime pratioca/pratiteljice"
                 value={c}
                 onChange={(e) => updateCompanion(i, e.target.value)}
               />
@@ -277,7 +277,7 @@ const RsvpForm = () => {
           ))}
           <button type="button" className="wedding-add-btn" onClick={addCompanion}>
             <Icon name="plus" size={16} />
-            Pratioc
+            Pratilac
           </button>
         </div>
       )}
